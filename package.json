@@ -1,0 +1,10 @@
+{
+  "name": "pch-dashboard",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dashboard de KPIs de Paid Media y funnel comercial de PCH Capital",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "google-auth-library": "9.15.1"
+  }
+}
