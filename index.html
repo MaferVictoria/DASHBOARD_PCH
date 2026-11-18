@@ -133,7 +133,7 @@ body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 (function () {
   const loaders = {}, calcs = {}, draws = {}, results = {}, onData = [];
   let params = {}, started = false;
-  const DATASETS = ['leads_ce1', 'leads_ce2', 'leads_fa1', 'leads_fa2', 'leads_ar1', 'leads_ar2', 'meta_spend', 'ds_status'];
+  const DATASETS = ['leads_ce1', 'leads_ce2', 'leads_fa1', 'leads_fa2', 'leads_ar1', 'leads_ar2', 'meta_spend'];
   DATASETS.forEach((k) => { results[k] = {status: 'loading', data: null}; });
   const rowsOf = (v) => (v && !Array.isArray(v) && Array.isArray(v.rows)) ? v.rows : v;
 
@@ -333,14 +333,15 @@ body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
         <li>Presupuesto MXN $20,000/mes: vigencia por confirmar; por ahora se compara solo contra la inversión de Meta.</li>
         <li>«Solicitud ≥ $1M»: definición provisional (SQL con monto declarado ≥ $1M).</li>
         <li>Arrendamiento: el formulario no pregunta monto solicitado.</li>
-        <li>La inversión llega hasta la última actualización de Dataslayer; los días posteriores no entran en costos.</li>
+        <li>Leads de Meta: la plataforma atribuye por fecha de impresión o clic (1 día vista, 7 días clic), así que su conteo diario puede diferir del de la hoja.</li>
+        <li>La inversión del conjunto de crédito anterior (formularios de «Hoja 1») queda fuera de alcance.</li>
         <li>«Hoja 1» (1–27 de octubre, misma campaña) no está incluida.</li>
       </ul></div>
   </div>
 </section>
 
 <footer class="foot" id="pie">
-  <span>Fuente leads: <b>Sheet «PCH - LEADS»</b> (6 pestañas de formularios Meta) · Fuente inversión: <b>«PCH | Dash KPI's Paid» · Query_MetaAds_2026</b> (Dataslayer)</span>
+  <span>Fuente leads: <b>Sheet «PCH - LEADS»</b> (6 pestañas de formularios Meta) · Fuente inversión: <b>Meta Ads en vivo</b> (cuenta pchcapital, campaña RO_MX_LEA_PRO_PCH_FORMS)</span>
   <details class="dic" id="diccionario"><summary>Diccionario de métricas y reglas de cálculo</summary><dl>
     <dt>Lead</dt><dd>Fila de formulario en CREDITO EMPRESARIAL 1/2, FACTORAJE 1/2 o ARRENDAMIENTO 1/2, sin leads de prueba de Meta. Total bruto, sin quitar duplicados.</dd>
     <dt>MQL / fondeable</dt><dd>Más de 2 años de operación = sí, CIEC vigente = sí y ventas anuales ≥ 10 millones; o Estatus «Fondeable» aunque falte algún dato. Sin datos y sin estatus: «Pendiente de calificación». Fondeable no es crédito aprobado.</dd>
@@ -365,20 +366,21 @@ Object.keys(IDS).forEach((id) => dash.loader(id, {
     const a = answer && answer.values ? answer : (answer && answer.content ? answer.content : answer);
     if (a && a.error) throw new Error(typeof a.error === 'string' ? a.error : (a.error.message || 'Error de Google Sheets'));
     const vals = (a && a.values) || [];
-    const columns = ['id','created_time','campaign_name','adset_name','ad_name','form_name','is_organic','platform','anios','ciec','ventas','monto','lead_status','contacto','estatus','comentarios','documento','formato','email','telefono'];
+    const columns = ['id','created_time','campaign_name','adset_name','adset_id','ad_name','form_name','is_organic','platform','anios','ciec','ventas','monto','lead_status','contacto','estatus','comentarios','documento','formato','email','telefono'];
     if (!vals.length) return {columns, rows: []};
     const low = vals[0].map((x) => String(x == null ? '' : x).trim().toLowerCase());
     const at = (n) => low.indexOf(n);
     const find = (re) => low.findIndex((x) => re.test(x));
     const iLS = at('lead_status');
-    const ix = {id: at('id'), created_time: at('created_time'), campaign_name: at('campaign_name'), adset_name: at('adset_name'), ad_name: at('ad_name'), form_name: at('form_name'), is_organic: at('is_organic'), platform: at('platform'), anios: find(/m[aá]s_de_\d_a[ñn]os/), ciec: find(/ciec/), ventas: find(/ventas_anual/), monto: find(/monto_de_financiamiento/), contacto: at('contacto'), estatus: at('estatus'), comentarios: at('comentarios'), documento: at('documento'), email: at('email'), telefono: at('phone_number')};
+    const ix = {id: at('id'), created_time: at('created_time'), campaign_name: at('campaign_name'), adset_name: at('adset_name'), adset_id: at('adset_id'), ad_name: at('ad_name'), form_name: at('form_name'), is_organic: at('is_organic'), platform: at('platform'), anios: find(/m[aá]s_de_\d_a[ñn]os/), ciec: find(/ciec/), ventas: find(/ventas_anual/), monto: find(/monto_de_financiamiento/), contacto: at('contacto'), estatus: at('estatus'), comentarios: at('comentarios'), documento: at('documento'), email: at('email'), telefono: at('phone_number')};
     const legacy = ix.estatus < 0;
     const rows = vals.slice(1).filter((r) => r && r.some((c) => String(c == null ? '' : c).trim() !== '')).map((r) => {
       const g = (i) => (i >= 0 && i < r.length && r[i] != null) ? String(r[i]).trim() : '';
       const o = {};
-      ['id','created_time','campaign_name','adset_name','ad_name','form_name','is_organic','platform','anios','ciec','ventas','monto','lead_status','contacto','comentarios','documento','email','telefono'].forEach((k) => { o[k] = g(ix[k]); });
-      o.estatus = legacy ? (iLS >= 0 ? g(iLS + 1) : '') : g(ix.estatus);
-      o.formato = legacy ? 'antiguo' : 'estándar';
+      ['id','created_time','campaign_name','adset_name','adset_id','ad_name','form_name','is_organic','platform','anios','ciec','ventas','monto','lead_status','contacto','comentarios','documento','email','telefono'].forEach((k) => { o[k] = g(ix[k]); });
+      o.estatus = legacy ? (iLS >= 0 ? g(iLS + 1) : '') : (g(ix.estatus) || g(ix.comentarios));
+      if (legacy && !o.contacto && iLS >= 0) o.contacto = g(iLS + 2);
+      o.formato = legacy ? 'antiguo' : (g(ix.estatus) ? 'estándar' : 'comentario');
       return o;
     });
     return {columns, rows};
@@ -386,38 +388,18 @@ Object.keys(IDS).forEach((id) => dash.loader(id, {
 }));
 
 dash.loader('meta_spend', {
-  description: 'Convierte la respuesta de Google Sheets en filas diarias por anuncio y tipa fecha (año 2026, rango de la query) e importes. No calcula nada.',
+  description: 'Convierte la respuesta del conector de Meta Ads (una fila por anuncio y día) en filas tipadas. No calcula nada.',
   fn: ({answer}) => {
-    const a = answer && answer.values ? answer : (answer && answer.content ? answer.content : answer);
-    if (a && a.error) throw new Error(typeof a.error === 'string' ? a.error : (a.error.message || 'Error de Google Sheets'));
-    const vals = (a && a.values) || [];
-    const columns = ['fecha','campana','adset','anuncio','costo','leads_meta','website_leads','mensajes'];
-    if (!vals.length) return {columns, rows: []};
-    const h = vals[0].map((x) => String(x == null ? '' : x).trim());
-    const at = (n) => h.indexOf(n);
-    const M = {ene:1,feb:2,mar:3,abr:4,may:5,jun:6,jul:7,ago:8,sep:9,oct:10,nov:11,dic:12};
-    const num = (s) => { const t = String(s == null ? '' : s).replace(/[$,\s]/g, ''); if (t === '' || t === '-') return null; const n = Number(t); return isFinite(n) ? n : null; };
-    const pad = (n) => String(n).padStart(2, '0');
-    const iD = at('Date'), iC = at('Campaign name'), iA = at('AdSet name'), iN = at('Ad name'), iT = at('Total Cost'), iL = at('On Facebook Leads'), iW = at('Website leads'), iM = at('Messaging conversations started');
-    const rows = vals.slice(1).filter((r) => r && r[iD]).map((r) => {
-      const g = (i) => (i >= 0 && i < r.length && r[i] != null) ? String(r[i]).trim() : '';
-      const m = /^(\d{1,2})-([a-zñ]{3})/i.exec(g(iD));
-      const mes = m ? M[m[2].toLowerCase()] : null;
-      return {fecha: m && mes ? '2026-' + pad(mes) + '-' + pad(m[1]) : null, campana: g(iC), adset: g(iA), anuncio: g(iN), costo: num(g(iT)), leads_meta: num(g(iL)), website_leads: num(g(iW)), mensajes: num(g(iM))};
-    });
+    let a = answer;
+    if (a && a.content && !a.ad_entities) a = a.content;
+    if (a && a.error) throw new Error(typeof a.error === 'string' ? a.error : (a.error.message || 'Error de Meta Ads'));
+    let list = a && a.ad_entities;
+    if (typeof list === 'string') list = JSON.parse(list);
+    if (!Array.isArray(list)) throw new Error('Respuesta de Meta Ads sin filas');
+    const num = (v) => { if (v == null) return null; const x = typeof v === 'object' ? v.value : v; const n = Number(x); return isFinite(n) ? n : null; };
+    const columns = ['fecha','campana','adset_id','adset','ad_id','anuncio','costo','leads_meta'];
+    const rows = list.map((r) => ({fecha: r.date_start || null, campana: r.campaign_name || 'RO_MX_LEA_PRO_PCH_FORMS', adset_id: String(r.adset_id || ''), adset: r.adset_name || '', ad_id: String(r.id || ''), anuncio: r.name || '', costo: num(r.amount_spent), leads_meta: num(r.lead)}));
     return {columns, rows};
-  }
-});
-
-dash.loader('ds_status', {
-  description: 'Convierte la pestaña DataslayerQueries en filas (una por query de Dataslayer).',
-  fn: ({answer}) => {
-    const a = answer && answer.values ? answer : (answer && answer.content ? answer.content : answer);
-    if (a && a.error) throw new Error(typeof a.error === 'string' ? a.error : (a.error.message || 'Error de Google Sheets'));
-    const vals = (a && a.values) || [];
-    if (!vals.length) return [];
-    const h = vals[0].map((x) => String(x == null ? '' : x).trim());
-    return vals.slice(1).filter((r) => r && r.length).map((r) => { const o = {}; h.forEach((k, i) => { if (k) o[k] = r[i] == null ? '' : String(r[i]); }); return o; });
   }
 });
 
@@ -466,7 +448,7 @@ dash.calc('leads_class', {
       if (e) {
         if (e.includes('elegib')) estatus = 'Elegibilidad';
         else if (e.includes('fondeab')) estatus = 'Fondeable';
-        else if (e.includes('rechaz') || e.includes('no viable') || (r.formato === 'antiguo' && /^no /.test(e))) estatus = 'Rechazado';
+        else if (e.includes('rechaz') || e.includes('no viable') || (r.formato !== 'estándar' && /^no[ ,]/.test(e))) estatus = 'Rechazado';
         else estatus = 'Otro';
       }
       const crit = [anios, ciec, ventas];
@@ -481,11 +463,11 @@ dash.calc('leads_class', {
       if (etapa === 'Rechazado' || etapa === 'No cumple criterios') {
         const f = [];
         if (anios === 'No') f.push('Años de operación'); if (ciec === 'No') f.push('Sin CIEC'); if (ventas === 'No') f.push('Ventas < 10M');
-        if (!f.length) { if (/venta/.test(e)) f.push('Ventas < 10M'); else if (/ciec/.test(e)) f.push('Sin CIEC'); else if (/ano|operacion/.test(e)) f.push('Años de operación'); else if (/garantia/.test(e)) f.push('Garantía'); else if (/aaa|cobro/.test(e)) f.push('Requisito de factoraje'); else f.push('Sin motivo registrado'); }
+        if (!f.length) { if (/venta/.test(e)) f.push('Ventas < 10M'); else if (/ciec/.test(e)) f.push('Sin CIEC'); else if (/ano|operacion/.test(e)) f.push('Años de operación'); else if (/garantia/.test(e)) f.push('Garantía'); else if (/aaa|cobro|gobierno/.test(e)) f.push('Requisito de factoraje'); else f.push('Sin motivo registrado'); }
         motivo = f.join(' + ');
       }
       let contacto = r.contacto;
-      if (!contacto && r.formato === 'antiguo' && estatus === 'Otro') contacto = r.estatus;
+      if (!contacto && r.formato !== 'estándar' && estatus === 'Otro') contacto = r.estatus;
       const montoR = r.monto ? rango(r.monto) : null;
       const monto = !r.monto ? 'Sin dato' : (cumple(montoR, 1e6) === 'Sí' ? 'Sí' : (cumple(montoR, 1e6) === 'No' ? 'No' : 'Sin dato'));
       const pagado = norm(r.is_organic) === 'false';
@@ -506,8 +488,9 @@ dash.calc('resumen', {
   fn: (leads, gasto) => {
     const L = (leads || []);
     const real = L.filter((l) => l.prueba === 'No' && l.fecha);
-    const scope = (gasto || []).filter((g) => g.campana === 'RO_MX_LEA_PRO_PCH_FORMS' && g.fecha);
-    const svc = (a) => /_CREDITO$/.test(a) ? 'Crédito Empresarial' : (/_FACTORAJE$/.test(a) ? 'Factoraje' : (/_ARRENDAMIENTO$/.test(a) ? 'Arrendamiento' : 'Sin asignar'));
+    const SVC_ID = {'120248230311540129': 'Crédito Empresarial', '120248229298130129': 'Factoraje', '120248230038680129': 'Arrendamiento'};
+    const svc = (id) => SVC_ID[id] || 'Fuera de alcance';
+    const scope = (gasto || []).filter((g) => g.fecha && SVC_ID[g.adset_id]);
     const fechasL = real.map((l) => l.fecha).sort();
     const fechasG = scope.filter((g) => (g.costo || 0) > 0).map((g) => g.fecha).sort();
     const inicio = fechasL[0] || null;
@@ -526,7 +509,7 @@ dash.calc('resumen', {
       const Ls = real.filter((l) => okP(l.fecha) && okS(l.servicio));
       const pruebas = L.filter((l) => l.prueba === 'Sí' && okP(l.fecha) && okS(l.servicio)).length;
       const Lw = Ls.filter((l) => enV(l.fecha));
-      const Gw = scope.filter((g) => okP(g.fecha) && okS(svc(g.adset)) && enV(g.fecha));
+      const Gw = scope.filter((g) => okP(g.fecha) && okS(svc(g.adset_id)) && enV(g.fecha));
       const cuenta = (gasto || []).filter((g) => g.fecha && okP(g.fecha)).reduce((a, g) => a + (g.costo || 0), 0);
       const inversion = Gw.reduce((a, g) => a + (g.costo || 0), 0);
       const mql = Ls.filter(esMql).length, sql = Ls.filter((l) => l.etapa === 'SQL').length;
@@ -556,7 +539,8 @@ dash.calc('dia', {
   description: 'Leads, etapas e inversión por día y servicio; los periodos del filtro suman estos días.',
   inputs: ['leads_class', 'meta_spend'],
   fn: (leads, gasto) => {
-    const svc = (c, a) => c !== 'RO_MX_LEA_PRO_PCH_FORMS' ? 'Otras campañas' : (/_CREDITO$/.test(a) ? 'Crédito Empresarial' : (/_FACTORAJE$/.test(a) ? 'Factoraje' : (/_ARRENDAMIENTO$/.test(a) ? 'Arrendamiento' : 'Sin asignar')));
+    const SVC_ID = {'120248230311540129': 'Crédito Empresarial', '120248229298130129': 'Factoraje', '120248230038680129': 'Arrendamiento'};
+    const svc = (id) => SVC_ID[id] || 'Fuera de alcance';
     const esMql = (l) => l.etapa === 'SQL' || l.etapa === 'MQL por estatus' || l.etapa === 'MQL por criterios';
     const m = {};
     const get = (f, s) => { const k = f + '|' + s; if (!m[k]) m[k] = {key: k, fecha: f, servicio: s, leads: 0, pruebas: 0, duplicados: 0, mql: 0, mql_criterios: 0, mql_estatus: 0, sql: 0, rechazados: 0, no_cumple: 0, pendientes: 0, monto_1m: 0, solicitudes_1m: 0, inversion: 0, leads_meta: 0}; return m[k]; };
@@ -576,7 +560,7 @@ dash.calc('dia', {
       if (l.monto_ge_1m === 'Sí') x.monto_1m += 1;
       if (l.etapa === 'SQL' && l.canal === 'Meta Ads' && l.monto_ge_1m === 'Sí') x.solicitudes_1m += 1;
     });
-    (gasto || []).forEach((g) => { if (!g.fecha) return; const x = get(g.fecha, svc(g.campana, g.adset)); x.inversion += g.costo || 0; x.leads_meta += g.leads_meta || 0; });
+    (gasto || []).forEach((g) => { if (!g.fecha) return; const x = get(g.fecha, svc(g.adset_id)); x.inversion += g.costo || 0; x.leads_meta += g.leads_meta || 0; });
     return Object.values(m).sort((a, b) => a.key.localeCompare(b.key));
   }
 });
@@ -605,12 +589,12 @@ dash.calc('dia_anuncio', {
   description: 'Inversión, leads de Meta, leads de la hoja y MQL por día, servicio y anuncio de la campaña RO_MX_LEA_PRO_PCH_FORMS.',
   inputs: ['leads_class', 'meta_spend'],
   fn: (leads, gasto) => {
-    const svc = (a) => /_CREDITO$/.test(a) ? 'Crédito Empresarial' : (/_FACTORAJE$/.test(a) ? 'Factoraje' : (/_ARRENDAMIENTO$/.test(a) ? 'Arrendamiento' : 'Sin asignar'));
+    const SVC_ID = {'120248230311540129': 'Crédito Empresarial', '120248229298130129': 'Factoraje', '120248230038680129': 'Arrendamiento'};
     const esMql = (l) => l.etapa === 'SQL' || l.etapa === 'MQL por estatus' || l.etapa === 'MQL por criterios';
     const m = {};
     const get = (f, s, an) => { const k = f + '|' + s + '|' + an; if (!m[k]) m[k] = {key: k, fecha: f, servicio: s, anuncio: an, inversion: 0, leads_meta: 0, leads: 0, mql: 0}; return m[k]; };
-    (gasto || []).filter((g) => g.campana === 'RO_MX_LEA_PRO_PCH_FORMS' && g.fecha).forEach((g) => { const x = get(g.fecha, svc(g.adset), g.anuncio || 'Sin nombre'); x.inversion += g.costo || 0; x.leads_meta += g.leads_meta || 0; });
-    (leads || []).filter((l) => l.prueba === 'No' && l.fecha && l.canal === 'Meta Ads').forEach((l) => { const x = get(l.fecha, svc(l.adset), l.anuncio || 'Sin nombre'); x.leads += 1; if (esMql(l)) x.mql += 1; });
+    (gasto || []).filter((g) => g.fecha && SVC_ID[g.adset_id]).forEach((g) => { const x = get(g.fecha, SVC_ID[g.adset_id], g.anuncio || 'Sin nombre'); x.inversion += g.costo || 0; x.leads_meta += g.leads_meta || 0; });
+    (leads || []).filter((l) => l.prueba === 'No' && l.fecha && l.canal === 'Meta Ads').forEach((l) => { const x = get(l.fecha, l.servicio, l.anuncio || 'Sin nombre'); x.leads += 1; if (esMql(l)) x.mql += 1; });
     return Object.values(m);
   }
 });
@@ -743,14 +727,12 @@ dash.draw('f_desde', dateInput('d'));
 dash.draw('f_hasta', dateInput('h'));
 
 dash.draw('hdr_badge', (el) => {
-  const w = PCH.win(); const ds = dash.data('ds_status');
-  if (!w) { el.textContent = 'Cargando datos…'; return; }
-  const q = ds.status === 'ok' ? (ds.data || []).find((r) => r['Sheet name'] === 'Query_MetaAds_2026') : null;
-  const dot = PCH.mk('span', 'dot'); const t = PCH.mk('span', null, 'Leads al ');
+  const w = PCH.win();
+  if (!w) { el.textContent = '—'; return; }
+  const dot = PCH.mk('span', 'dot'); const t1 = PCH.mk('span', null, 'Meta Ads en vivo · Leads al ');
   const b1 = PCH.mk('b', null, PCH.fdate(w.ultimo_lead)); const t2 = PCH.mk('span', null, ' · Inversión al ');
   const b2 = PCH.mk('b', null, PCH.fdate(w.corte_inversion));
-  el.replaceChildren(dot, t, b1, t2, b2);
-  if (q && q['Last status']) el.title = 'Dataslayer: ' + q['Updated'] + ' · ' + q['Last status'];
+  el.replaceChildren(dot, t1, b1, t2, b2);
 });
 
 dash.draw('takeaway', (el) => {
