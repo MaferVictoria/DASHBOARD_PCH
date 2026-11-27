@@ -76,7 +76,7 @@
   .chart-container{ position:relative; height:330px; }
 
   .funnel{ display:flex; flex-direction:column; gap:.75rem; }
-  .funnel-row{ display:grid; grid-template-columns:70px 1fr 120px; align-items:center; gap:.8rem; }
+  .funnel-row{ display:grid; grid-template-columns:130px 1fr 120px; align-items:center; gap:.8rem; }
   .funnel-name{ font-weight:800; font-size:.9rem; }
   .funnel-bar-bg{ background:var(--primary); border-radius:8px; height:42px; overflow:hidden; }
   .funnel-bar{ height:100%; border-radius:8px; display:flex; align-items:center; padding:0 .8rem; font-weight:800; font-size:1rem; color:#06162b; min-width:44px; transition:width .4s; }
@@ -190,12 +190,12 @@
 
     <div class="grid-2">
       <div class="card">
-        <h3>Embudo Lead → MQL → SQL</h3>
+        <h3>Embudo Lead → Fondeables → Invitación enviada</h3>
         <div class="funnel" id="funnelMain"></div>
-        <p class="small" style="margin-top:1rem">MQL: ventas anuales ≥ $10M MXN + CIEC vigente + 2 años o más de operación. SQL: lead al que el equipo comercial le envió invitación de PCH (columnas de seguimiento del Sheet).</p>
+        <p class="small" style="margin-top:1rem">Fondeable: ventas anuales ≥ $10M MXN + CIEC vigente + 2 años o más de operación. Invitación enviada: lead al que el equipo comercial le envió invitación de PCH (columnas de seguimiento del Sheet).</p>
       </div>
       <div class="card">
-        <h3>Gasto diario vs. formularios y MQL</h3>
+        <h3>Gasto diario vs. formularios y fondeables</h3>
         <div class="chart-container"><canvas id="chartDaily"></canvas></div>
       </div>
     </div>
@@ -203,7 +203,7 @@
     <div class="card">
       <h3>Resultados por conjunto de anuncios</h3>
       <div class="table-wrap"><table id="tblAdsets"></table></div>
-      <p class="small" style="margin-top:.8rem">Gasto, formularios y CPL vienen de Meta. Leads, MQL y SQL vienen del Sheet (pestañas 1 y 2 de cada servicio unificadas). Pueden diferir un poco: Meta cuenta por zona horaria de la cuenta y el Sheet por fecha de llegada.</p>
+      <p class="small" style="margin-top:.8rem">Gasto, formularios y CPL vienen de Meta. Leads, fondeables e invitaciones enviadas vienen del Sheet (pestañas 1 y 2 de cada servicio unificadas). Pueden diferir un poco: Meta cuenta por zona horaria de la cuenta y el Sheet por fecha de llegada.</p>
     </div>
   </div></div>
 
@@ -219,7 +219,7 @@
   <!-- ============ GOOGLE ADS ============ -->
   <div class="tab-content" id="tab-google"><div class="container">
     <div class="placeholder-note">
-      <b>Google Ads · pendiente de conexión.</b> Esta pestaña ya tiene la estructura final. Cuando arranquen campañas en Google Ads se agrega la función <code>/api/google-ads-data</code> en Vercel y estos indicadores se llenan solos, con el mismo filtro de periodo y las mismas reglas de MQL/SQL.
+      <b>Google Ads · pendiente de conexión.</b> Esta pestaña ya tiene la estructura final. Cuando arranquen campañas en Google Ads se agrega la función <code>/api/google-ads-data</code> en Vercel y estos indicadores se llenan solos, con el mismo filtro de periodo y las mismas reglas de fondeables e invitaciones enviadas.
     </div>
     <div class="section-title">Desempeño de medios <span class="src">Fuente: Google Ads</span></div>
     <div class="kpi-grid">
@@ -233,15 +233,15 @@
     <div class="section-title">Pipeline comercial <span class="src">Fuente: Google Sheet</span></div>
     <div class="kpi-grid">
       <div class="kpi-card muted"><div class="kpi-label">Leads</div><div class="kpi-value">—</div></div>
-      <div class="kpi-card muted"><div class="kpi-label">MQL</div><div class="kpi-value">—</div></div>
-      <div class="kpi-card muted"><div class="kpi-label">Costo por MQL</div><div class="kpi-value">—</div></div>
-      <div class="kpi-card muted"><div class="kpi-label">SQL</div><div class="kpi-value">—</div></div>
-      <div class="kpi-card muted"><div class="kpi-label">Costo por SQL</div><div class="kpi-value">—</div></div>
+      <div class="kpi-card muted"><div class="kpi-label">Fondeables</div><div class="kpi-value">—</div></div>
+      <div class="kpi-card muted"><div class="kpi-label">Costo por fondeable</div><div class="kpi-value">—</div></div>
+      <div class="kpi-card muted"><div class="kpi-label">Invitación enviada</div><div class="kpi-value">—</div></div>
+      <div class="kpi-card muted"><div class="kpi-label">Costo por invitación enviada</div><div class="kpi-value">—</div></div>
     </div>
     <div class="card">
       <h3>Por campaña / servicio</h3>
       <div class="table-wrap"><table>
-        <thead><tr><th>Campaña</th><th>Servicio</th><th class="num">Gasto</th><th class="num">Clics</th><th class="num">Conversiones</th><th class="num">CPL</th><th class="num">MQL</th><th class="num">SQL</th></tr></thead>
+        <thead><tr><th>Campaña</th><th>Servicio</th><th class="num">Gasto</th><th class="num">Clics</th><th class="num">Conversiones</th><th class="num">CPL</th><th class="num">Fondeables</th><th class="num">Invitación enviada</th></tr></thead>
         <tbody><tr><td colspan="8" class="small" style="text-align:center;padding:1.6rem">Sin datos todavía</td></tr></tbody>
       </table></div>
     </div>
@@ -251,7 +251,7 @@
   <div class="tab-content" id="tab-leads"><div class="container">
     <div class="toolbar">
       <select id="fltService"><option value="">Todos los servicios</option><option value="CREDITO">Crédito</option><option value="ARRENDAMIENTO">Arrendamiento</option><option value="FACTORAJE">Factoraje</option></select>
-      <select id="fltStage"><option value="">Todas las etapas</option><option value="mql">Solo MQL</option><option value="sql">Solo SQL</option><option value="nomql">No MQL</option></select>
+      <select id="fltStage"><option value="">Todas las etapas</option><option value="mql">Solo fondeables</option><option value="sql">Solo invitación enviada</option><option value="nomql">No fondeables</option></select>
       <input id="fltText" type="search" placeholder="Buscar nombre, empresa o seguimiento…">
       <span class="small" id="leadsCount"></span>
     </div>
@@ -404,7 +404,7 @@ function processTabs(tabs){
       const segN = norm(seg);
       const isSQL = SQL_PATTERNS.some(p=>p.test(segN)) || segCells.some(c=>norm(c)==='SQL');
       let estatus;
-      if(isSQL) estatus = 'SQL';
+      if(isSQL) estatus = 'Invitación enviada';
       else if(!seg) estatus = 'Sin revisar';
       else if(/NO VIA|NO VAI|NO CUENTA|NO TIENE|NO GRAVA|NO VEMOS|NO ATRACTIV|NO SON AAA|REQUISITO|MENOR/.test(segN)) estatus = 'Descartado';
       else estatus = 'En seguimiento';
@@ -527,10 +527,10 @@ function renderResumen(K, range){
 
   document.getElementById('kpiPipeline').innerHTML = [
     kpiCard('Leads', fmtInt(T.leads), 'Formularios recibidos en el Sheet', 'var(--accent)'),
-    kpiCard('MQL', fmtInt(T.mql), `${fmtPct(T.mql,T.leads)} de los leads`, 'var(--success)'),
-    kpiCard('Costo por MQL', META_OK ? fmtMoney(safeDiv(T.spend,T.mql)) : '—', '', 'var(--success)'),
-    kpiCard('SQL', fmtInt(T.sql), `${fmtPct(T.sql,T.leads)} de los leads`, 'var(--accent-2)'),
-    kpiCard('Costo por SQL', META_OK ? fmtMoney(safeDiv(T.spend,T.sql)) : '—', '', 'var(--accent-2)'),
+    kpiCard('Fondeables', fmtInt(T.mql), `${fmtPct(T.mql,T.leads)} de los leads`, 'var(--success)'),
+    kpiCard('Costo por fondeable', META_OK ? fmtMoney(safeDiv(T.spend,T.mql)) : '—', '', 'var(--success)'),
+    kpiCard('Invitación enviada', fmtInt(T.sql), `${fmtPct(T.sql,T.leads)} de los leads`, 'var(--accent-2)'),
+    kpiCard('Costo por invitación enviada', META_OK ? fmtMoney(safeDiv(T.spend,T.sql)) : '—', '', 'var(--accent-2)'),
   ].join('');
 
   document.getElementById('funnelMain').innerHTML = funnelHTML(T);
@@ -545,7 +545,7 @@ function renderResumen(K, range){
       <td class="num">${fmtInt(b.sql)}</td><td class="num">${META_OK?fmtMoney(safeDiv(b.spend,b.sql)):'—'}</td></tr>`;
   }).join('');
   const unm = T.unmappedSpend ? `<tr><td class="small">Otros conjuntos de la campaña</td><td class="num">${money(T.unmappedSpend)}</td><td colspan="8"></td></tr>` : '';
-  document.getElementById('tblAdsets').innerHTML = `<thead><tr><th>Conjunto de anuncios</th><th class="num">Gasto</th><th class="num">% gasto</th><th class="num">Formularios Meta</th><th class="num">CPL</th><th class="num">Leads</th><th class="num">MQL</th><th class="num">Costo/MQL</th><th class="num">SQL</th><th class="num">Costo/SQL</th></tr></thead>
+  document.getElementById('tblAdsets').innerHTML = `<thead><tr><th>Conjunto de anuncios</th><th class="num">Gasto</th><th class="num">% gasto</th><th class="num">Formularios Meta</th><th class="num">CPL</th><th class="num">Leads</th><th class="num">Fondeables</th><th class="num">Costo/fondeable</th><th class="num">Invitación enviada</th><th class="num">Costo/invitación</th></tr></thead>
     <tbody>${rows}${unm}<tr class="total-row"><td>Total campaña</td><td class="num">${money(T.spend)}</td><td class="num">${META_OK?'100%':'—'}</td>
     <td class="num">${META_OK?fmtInt(T.metaLeads):'—'}</td><td class="num">${META_OK?fmtMoney(safeDiv(T.spend,T.metaLeads)):'—'}</td>
     <td class="num">${fmtInt(T.leads)}</td><td class="num">${fmtInt(T.mql)}</td><td class="num">${META_OK?fmtMoney(safeDiv(T.spend,T.mql)):'—'}</td>
@@ -561,7 +561,7 @@ function renderResumen(K, range){
     datasets: [
       { type:'bar', order:1, label:'Gasto (MXN)', data:days.map(d=>+spendByDay[d].toFixed(2)), backgroundColor:'rgba(200,164,92,.55)', borderRadius:4, yAxisID:'y' },
       { type:'line', order:0, label:'Formularios Meta', data:days.map(d=>metaLeadsByDay[d]), borderColor:'#4fa8e0', backgroundColor:'#4fa8e0', tension:.3, pointRadius:2, yAxisID:'y1' },
-      { type:'line', order:0, label:'MQL', data:days.map(d=>mqlByDay[d]), borderColor:'#2fbf71', backgroundColor:'#2fbf71', tension:.3, pointRadius:2, yAxisID:'y1' },
+      { type:'line', order:0, label:'Fondeables', data:days.map(d=>mqlByDay[d]), borderColor:'#2fbf71', backgroundColor:'#2fbf71', tension:.3, pointRadius:2, yAxisID:'y1' },
     ],
   }, true);
 }
@@ -573,8 +573,8 @@ function funnelHTML(T, color){
       <div class="funnel-bar-bg"><div class="funnel-bar" style="width:${Math.max(val/max*100, val?8:0)}%;background:${col}">${fmtInt(val)}</div></div>
       <div class="funnel-meta">${base!=null?`<b>${fmtPct(val,base)}</b> de ${baseName}<br>`:''}${cost!=null?`Costo: ${META_OK?fmtMoney(cost):'—'}`:''}</div></div>`;
   return step('Leads', T.leads, null, '', safeDiv(T.spend,T.leads), color||'#4fa8e0')
-       + step('MQL', T.mql, T.leads, 'leads', safeDiv(T.spend,T.mql), '#2fbf71')
-       + step('SQL', T.sql, T.mql, 'MQL', safeDiv(T.spend,T.sql), '#c8a45c');
+       + step('Fondeables', T.mql, T.leads, 'leads', safeDiv(T.spend,T.mql), '#2fbf71')
+       + step('Invitación enviada', T.sql, T.mql, 'fondeables', safeDiv(T.spend,T.sql), '#c8a45c');
 }
 
 function countBy(arr, fn){ const o={}; arr.forEach(x=>{ [].concat(fn(x)).forEach(k=>{ o[k]=(o[k]||0)+1; }); }); return Object.entries(o).sort((a,b)=>b[1]-a[1]); }
@@ -588,8 +588,8 @@ function renderServicios(K){
     labels: SERVICES.map(s=>s.label),
     datasets: [
       { type:'bar', label:'Leads', data:SERVICES.map(s=>K.bySvc[s.key].leads), backgroundColor:'#4fa8e0', borderRadius:4 },
-      { type:'bar', label:'MQL', data:SERVICES.map(s=>K.bySvc[s.key].mql), backgroundColor:'#2fbf71', borderRadius:4 },
-      { type:'bar', label:'SQL', data:SERVICES.map(s=>K.bySvc[s.key].sql), backgroundColor:'#c8a45c', borderRadius:4 },
+      { type:'bar', label:'Fondeables', data:SERVICES.map(s=>K.bySvc[s.key].mql), backgroundColor:'#2fbf71', borderRadius:4 },
+      { type:'bar', label:'Invitación enviada', data:SERVICES.map(s=>K.bySvc[s.key].sql), backgroundColor:'#c8a45c', borderRadius:4 },
     ],
   }, false);
 
@@ -612,20 +612,20 @@ function renderServicios(K){
       <div class="section-title">Pipeline comercial <span class="src">Fuente: Google Sheet</span></div>
       <div class="kpi-grid">
         ${kpiCard('Leads', fmtInt(b.leads), '', 'var(--accent)')}
-        ${kpiCard('MQL', fmtInt(b.mql), `${fmtPct(b.mql,b.leads)} de los leads`, 'var(--success)')}
-        ${kpiCard('Costo por MQL', META_OK?fmtMoney(safeDiv(b.spend,b.mql)):'—', '', 'var(--success)')}
-        ${kpiCard('SQL', fmtInt(b.sql), `${fmtPct(b.sql,b.leads)} de los leads`, 'var(--accent-2)')}
-        ${kpiCard('Costo por SQL', META_OK?fmtMoney(safeDiv(b.spend,b.sql)):'—', '', 'var(--accent-2)')}
+        ${kpiCard('Fondeables', fmtInt(b.mql), `${fmtPct(b.mql,b.leads)} de los leads`, 'var(--success)')}
+        ${kpiCard('Costo por fondeable', META_OK?fmtMoney(safeDiv(b.spend,b.mql)):'—', '', 'var(--success)')}
+        ${kpiCard('Invitación enviada', fmtInt(b.sql), `${fmtPct(b.sql,b.leads)} de los leads`, 'var(--accent-2)')}
+        ${kpiCard('Costo por invitación enviada', META_OK?fmtMoney(safeDiv(b.spend,b.sql)):'—', '', 'var(--accent-2)')}
       </div>
       <div class="grid-2">
         <div><h3 style="font-size:.88rem;margin-bottom:.8rem">Embudo</h3><div class="funnel">${funnelHTML(b, s.color)}</div></div>
         <div class="grid-2" style="grid-template-columns:1fr 1fr;margin:0">
-          <div><h3 style="font-size:.88rem;margin-bottom:.8rem">Por qué no son MQL</h3><div class="mini-list">${miniList(countBy(noMql,x=>x.motivos), noMql.length)}</div></div>
+          <div><h3 style="font-size:.88rem;margin-bottom:.8rem">Por qué no son fondeables</h3><div class="mini-list">${miniList(countBy(noMql,x=>x.motivos), noMql.length)}</div></div>
           <div><h3 style="font-size:.88rem;margin-bottom:.8rem">Estatus comercial</h3><div class="mini-list">${miniList(countBy(b.rows,x=>x.estatus), b.rows.length)}</div></div>
         </div>
       </div>
       <h3 style="font-size:.88rem;margin:1.4rem 0 .6rem">Por anuncio</h3>
-      <div class="table-wrap"><table><thead><tr><th>Anuncio</th><th class="num">Leads</th><th class="num">MQL</th><th class="num">% MQL</th><th class="num">SQL</th></tr></thead><tbody>${adRows}</tbody></table></div>
+      <div class="table-wrap"><table><thead><tr><th>Anuncio</th><th class="num">Leads</th><th class="num">Fondeables</th><th class="num">% fondeables</th><th class="num">Invitación enviada</th></tr></thead><tbody>${adRows}</tbody></table></div>
     </div>`;
   }).join('');
 }
@@ -640,8 +640,8 @@ function renderLeadsTable(K){
     (!stage || (stage==='mql'&&x.isMQL) || (stage==='sql'&&x.isSQL) || (stage==='nomql'&&!x.isMQL)) &&
     (!q || norm(`${x.nombre} ${x.web} ${x.puesto} ${x.seg} ${x.ciudad}`).includes(q)));
   document.getElementById('leadsCount').textContent = `${rows.length} leads`;
-  const pillEst = e => `<span class="pill ${e==='SQL'?'ok':e==='Descartado'?'no':e==='En seguimiento'?'wait':'neutral'}">${e}</span>`;
-  document.getElementById('tblLeads').innerHTML = `<thead><tr><th>Fecha</th><th>Servicio</th><th>Nombre</th><th>Sitio / puesto</th><th>Ventas declaradas</th><th>CIEC</th><th>2+ años</th><th>MQL</th><th>Estatus comercial</th><th>Seguimiento</th></tr></thead><tbody>` +
+  const pillEst = e => `<span class="pill ${e==='Invitación enviada'?'ok':e==='Descartado'?'no':e==='En seguimiento'?'wait':'neutral'}">${e}</span>`;
+  document.getElementById('tblLeads').innerHTML = `<thead><tr><th>Fecha</th><th>Servicio</th><th>Nombre</th><th>Sitio / puesto</th><th>Ventas declaradas</th><th>CIEC</th><th>2+ años</th><th>Fondeable</th><th>Estatus comercial</th><th>Seguimiento</th></tr></thead><tbody>` +
     (rows.map(x=>`<tr>
       <td style="white-space:nowrap">${prettyKey(x.fecha)}</td>
       <td><span class="dot" style="background:${SVC[x.servicio].color}"></span>${SVC[x.servicio].label}<div class="small">${esc(x.tab)}</div></td>
@@ -650,7 +650,7 @@ function renderLeadsTable(K){
       <td>${esc(x.ventasTxt)}${x.ventasMin!=null?`<div class="small">≥ ${fmtMoney(x.ventasMin,0)}</div>`:''}</td>
       <td>${x.ciec?'<span class="pill ok">Sí</span>':'<span class="pill no">No</span>'}</td>
       <td>${x.age?'<span class="pill ok">Sí</span>':'<span class="pill no">No</span>'}</td>
-      <td>${x.isMQL?'<span class="pill ok">MQL</span>':`<span class="pill no" title="${esc(x.motivos.join(', '))}">No</span><div class="small">${esc(x.motivos.join(', '))}</div>`}</td>
+      <td>${x.isMQL?'<span class="pill ok">Fondeable</span>':`<span class="pill no" title="${esc(x.motivos.join(', '))}">No</span><div class="small">${esc(x.motivos.join(', '))}</div>`}</td>
       <td>${pillEst(x.estatus)}</td>
       <td class="small">${esc(x.seg)}</td></tr>`).join('') || `<tr><td colspan="10" class="small" style="text-align:center;padding:1.5rem">Sin leads con estos filtros</td></tr>`) + '</tbody>';
 }
